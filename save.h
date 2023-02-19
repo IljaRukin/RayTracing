@@ -21,8 +21,8 @@ void save_img(color image[height][width], float scaling, string name)
     ofstream myfile;
     myfile.open(name);
     myfile << "P3\n" << width << " " << height << "\n255\n";
-    //for (unsigned row = 0; row < height; row++)
-	for (int row = height - 1; row >= 0; row--)
+    for (unsigned row = 0; row < height; row++)
+	//for (int row = height - 1; row >= 0; row--)
     {
         for (unsigned column = 0; column < width; column++)
         {
