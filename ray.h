@@ -103,64 +103,30 @@ public:
     }
 };
 
-void generate_rays_fisheye(Vec3f origin, float fov_horizontal[], float fov_vertical[], ray rays[height][width])
+void generate_rays_fisheye(Vec3f origin, Vec3f left_bottom, Vec3f left_top, Vec3f right_bottom, ray rays[height][width])
 {
-    float angle_vertical = fov_vertical[0];
-    float angle_step_vertical = (fov_vertical[2] - fov_vertical[0]) / (height - 1);
-    float angle_horizontal = fov_horizontal[0];
-    float angle_step_horizontal = (fov_horizontal[0] - fov_horizontal[2]) / (width - 1);
-    //cout << "step horizontal: " << angle_step_horizontal << " step vertical: " << angle_step_vertical << endl;
-    float sin_vertical;
-    float cos_vertical;
-
-    for (unsigned row = 0; row < height; row++)
-    {
-        float angle_horizontal = fov_horizontal[0];
-        sin_vertical = sin(angle_vertical * deg2rad);
-        cos_vertical = cos(angle_vertical * deg2rad);
-        for (unsigned column = 0; column < width; column++)
-        {
-            rays[row][column].ray_origin = origin;
-            //Vec3f dir = Vec3f(sin(angle_horizontal * deg2rad) * cos(angle_vertical * deg2rad), sin(angle_horizontal * deg2rad) * sin(angle_vertical * deg2rad), cos(angle_horizontal * deg2rad));
-            Vec3f dir = Vec3f(sin_vertical * cos(angle_horizontal * deg2rad), sin_vertical * sin(angle_horizontal * deg2rad), cos_vertical);
-            rays[row][column].ray_direction = dir;
-            //dir.print();
-            //cout << " angle horizontal: " << angle_horizontal << " angle vertical: " << angle_vertical << endl;
-            angle_horizontal -= angle_step_horizontal;
-        }
-        angle_vertical += angle_step_vertical;
-    }
-
+	for (unsigned row = 0; row < height; row++)
+	{
+		for (unsigned column = 0; column < width; column++)
+		{
+			rays[row][column].ray_origin = origin;
+			rays[row][column].ray_direction = (left_top - (left_top - left_bottom) * ((float)row / (height-1)) + (right_bottom - left_bottom) * ((float)column / (width-1))) - origin;
+			rays[row][column].ray_direction.normalize();
+		}
+	}
 }
 
-void generate_rays_parallel(Vec3f origin, float phi, float theta, float range_horizontal[], float range_vertical[], ray rays[height][width])
+void generate_rays_parallel(Vec3f direction, Vec3f left_bottom, Vec3f left_top, Vec3f right_bottom, ray rays[height][width])
 {
-    Vec3f direction = Vec3f(sin(theta * deg2rad) * cos(phi * deg2rad), sin(theta * deg2rad) * sin(phi * deg2rad), cos(theta * deg2rad));
-    Vec3f vec1 = Vec3f(cos(theta *deg2rad)* cos(phi *deg2rad), cos(theta *deg2rad) *sin(phi *deg2rad), -sin(theta *deg2rad)); //(cos(theta)*cos(phi),cos(theta)*sin(phi),-sin(theta))
-    Vec3f vec2 = Vec3f(-sin(phi *deg2rad), cos(phi *deg2rad), 0);//(-sin(phi),cos(phi),0)
-    cout << "direction: ";
-    direction.print();
-    cout << "origin: ";
-    origin.print();
-    cout << "vec1: ";
-    vec1.print();
-    cout << "vec2: ";
-    vec2.print();
-    float step_vec2 = (range_vertical[0] - range_vertical[2]) / (height - 1);
-    float step_vec1 = (range_horizontal[0] - range_horizontal[2]) / (width - 1);
-    Vec3f edge = origin + vec2 *range_horizontal[0] - vec1 * range_vertical[0];
-
-    for (unsigned row = 0; row < height; row++)
-    {
-        float pixel_horizontal = range_horizontal[0];
-        for (unsigned column = 0; column < width; column++)
-        {
-            rays[row][column].ray_origin = edge - vec2 * step_vec2*row + vec1* step_vec1* column;
-            rays[row][column].ray_direction = direction;
-            //rays[row][column].ray_origin.print();
-        }
-    }
-
+	direction = direction.normalize();
+	for (unsigned row = 0; row < height; row++)
+	{
+		for (unsigned column = 0; column < width; column++)
+		{
+			rays[row][column].ray_origin = left_top - (left_top - left_bottom) * ((float)row / (height - 1)) + (right_bottom - left_bottom) * ((float)column / (width - 1));
+			rays[row][column].ray_direction = direction;
+		}
+	}
 }
 
 void generate_rays_lensarray()
