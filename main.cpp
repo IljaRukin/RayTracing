@@ -39,54 +39,38 @@ int main(void)
     model1 = import_obj(model1, basepath, filename);
     //PrintInfo(model1.attrib, model1.shapes, model1.materials);
 
-    //---------- camera view fisheye ----------
-    /*
-	//view for triangle & cube
-    Vec3f origin = Vec3f(-1, -2, 1);
-    float fov_horizontal[3] = { 90,30,-30 };
-    float fov_vertical[3] = { 70,110,150 };
-    //float fov_vertical[3];
-    //for (uint8_t k = 0; k < 3; k++) { fov_vertical[k] = (fov_horizontal[k] - fov_horizontal[1]) / width * height + 70; }
-    
-    cout << "fov horizontal: " << fov_horizontal[0] << " " << fov_horizontal[1] << " " << fov_horizontal[2] << endl;
-    cout << "fov vertical: " << fov_vertical[0] << " " << fov_vertical[1] << " " << fov_vertical[2] << endl;
+	//---------- view & ray generation ----------
+	/*
+	left_top [0,0]                                [0,width-1]
+	^
+	|
+	|
+	left_bottom [height-1,0] ---> right_bottom [height-1,width-1]
+	*/
+	// note: main view direction is Vec3f(0,0,1)
+	auto rays = new ray[height][width];
+	float theta_y = -10 * deg2rad; //rotate around y-axis (horizontal)
+	float theta_x = -10 * deg2rad; //rotate around x-axis (vertical)
+	Mat3 rotX = rotXmat(theta_x); rotX.print();
+	Mat3 rotY = rotYmat(theta_y); rotY.print();
 
-    //generate rays from camera view
-    //ray rays[height][width];
-    auto rays = new ray[height][width];
-    generate_rays_fisheye(origin, fov_horizontal, fov_vertical, rays);
-    */
-
-    //---------- camera view parallel ----------
+	Vec3f rotation = Vec3f(sin(theta_y) * cos(theta_x), sin(theta_y) * sin(theta_x), cos(theta_y));
+	Vec3f left_top = rotY.matProduct(rotX.matProduct( Vec3f(225-450, 225+450, -100) ) );
+	Vec3f left_bottom = rotY.matProduct(rotX.matProduct( Vec3f(225-450, 0, -100) ) );
+	Vec3f right_bottom = rotY.matProduct(rotX.matProduct( Vec3f(225+450, 0, -100) ) );
 
 	/*
-	//view for triangle & cube
-	Vec3f origin = Vec3f(300, 270, -600);
-	float rotation_horizontal = 10;
-	float rotation_vertical = 0;
-	float range_horizontal[3] = { -400,0,400 };
-	float range_vertical[3] = { -400,0,400 };
+	// Perspective Projection
+	Vec3f origin = Vec3f(225, 225, -800);
+	generate_rays_fisheye(origin, left_bottom, left_top, right_bottom, rays);
 	*/
 
-	/*
-    //view for triangle & cube
-    Vec3f origin = Vec3f(0, -1, 0);
-    float rotation_horizontal = 110;
-    float rotation_vertical = 110;
-    float range_horizontal[3] = { -2,0,2 };
-    float range_vertical[3] = { -2,0,2 };
-	*/
-
-	//view for cornell_box
-	Vec3f origin = Vec3f(450, 300, -600);
-	float rotation_horizontal = -10;
-	float rotation_vertical = 10;
-	float range_horizontal[3] = { -400,0,400 };
-	float range_vertical[3] = { -400,0,400 };
-
-    auto rays = new ray[height][width];
-    generate_rays_parallel(origin, rotation_vertical, rotation_horizontal, range_horizontal, range_vertical, rays);
-
+	// Orthographic Projection
+	Vec3f direction = rotY.matProduct(rotX.matProduct(Vec3f(0, 0, 1)));
+	//Vec3f direction = -(left_top - left_bottom).crossProduct(right_bottom - left_bottom).normalize();
+	direction.print();
+    generate_rays_parallel(direction, left_bottom, left_top, right_bottom, rays);
+	
     //---------- render image ----------
     auto image = new color[height][width];
     //when using multiple models, just render all models one after another in no particular order
