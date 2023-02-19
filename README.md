@@ -1,2 +1,2 @@
 # raytracing written in C++
-raytracing of triangles with phong illumination using triangle .obj-objects and output the result as ppm image
+raytracing of triangles with flat shading using triangle .obj-objects and output the result as ppm image
