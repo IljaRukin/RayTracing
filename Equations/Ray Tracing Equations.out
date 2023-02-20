@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Physical based rendering}{}% 1
+\BOOKMARK [1][-]{section.2}{space partitioning with by kd-Trees with help of surface area heuristic \(SAH\)}{}% 2
+\BOOKMARK [1][-]{section.3}{Rays}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Ray}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Rays Fisheye \(Perspective\)}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Rays Parallel \(Orthographic\)}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.4}{Rays form a thin lens}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.5}{lens array}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Intersections}{}% 9
+\BOOKMARK [1][-]{section.5}{Interaction}{}% 10
+\BOOKMARK [2][-]{subsection.5.1}{Reflection}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.2}{Refraction}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.3}{Diffuse Reflection}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.4}{Amount of reflections and transmission}{section.5}% 14

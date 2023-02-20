@@ -1,0 +1,12 @@
+\begin{thebibliography}{1}
+
+\bibitem{moller1997fast}
+Tomas M{\"o}ller and Ben Trumbore.
+\newblock Fast, minimum storage ray-triangle intersection.
+\newblock {\em Journal of graphics tools}, 2(1):21--28, 1997.
+
+\bibitem{de2006reflections}
+Bram De~Greve.
+\newblock Reflections and refractions in ray tracing.
+
+\end{thebibliography}
