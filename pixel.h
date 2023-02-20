@@ -16,7 +16,8 @@ public:
     void output(ofstream* myfile) const { *myfile << x << " " << y << " " << z << "\n"; };
     void output_uint8(ofstream* myfile) const { *myfile << round(x) << " " << round(y) << " " << round(z) << "\n"; };
     void print() const { cout << x << " " << y << " " << z << "\n"; };
-    float maximum() const { return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z); };
+	float maximum() const { return (x > y) ? ((x > z) ? x : z) : ((y > z) ? y : z); };
+	float minimum() const { return (x < y) ? ((x < z) ? x : z) : ((y < z) ? y : z); };
 
     void render_pixel(triangle_mesh model, ray r)
     {

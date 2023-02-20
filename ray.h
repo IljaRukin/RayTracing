@@ -129,7 +129,41 @@ void generate_rays_parallel(Vec3f direction, Vec3f left_bottom, Vec3f left_top, 
 	}
 }
 
-void generate_rays_lensarray()
+void generate_rays_pinhole_array(float z_display, float z_pinhole, Vec2f left_top, Vec2f t1, Vec2f t2, ray rays[height][width])
 {
+	Vec2f ray_origin; Vec2f pinhole_coordinate;  Vec2f pinhole_center;
+	Vec2f scale = Vec2f(1, -1);
+	//Vec2f scale = Vec2f(pixelwidth, -pixelheight); t1 *= scale; t2 *= scale;
+	float border;
+	int t1_offset; int t2_offset;
+	for (unsigned row = 0; row < height; row++)
+	{
+		for (unsigned column = 0; column < width; column++)
+		{
+			//coordinate
+			//ray_origin2D = left_top - (left_top - left_bottom) * ((float)row / (height - 1)) + (right_bottom - left_bottom) * ((float)column / (width - 1));
+			ray_origin = Vec2f(column, row);
 
+			//coordinate inside lens
+			t2_offset = round(ray_origin.y / t2.y);
+			pinhole_coordinate = ray_origin - t2 * t2_offset;
+			t1_offset = round(pinhole_coordinate.x / t1.x);
+			pinhole_coordinate = pinhole_coordinate - t1 * t1_offset;
+			border = pinhole_coordinate.length() > (pinhole_coordinate.nosign() - t2).length();
+			pinhole_coordinate = pinhole_coordinate - t2 * pinhole_coordinate.sign()*border;
+
+			//lens center positions
+			pinhole_center = ray_origin - pinhole_coordinate;
+
+			//transform position & size
+			ray_origin = left_top + ray_origin*scale;
+			// pinhole_coordinate = left_top + pinhole_coordinate*scale; //not used later
+			pinhole_center = left_top + pinhole_center*scale;
+
+			rays[row][column].ray_origin = Vec3f(ray_origin.x, ray_origin.y, z_display);
+
+			rays[row][column].ray_direction = Vec3f(pinhole_center.x, pinhole_center.y, z_pinhole) - rays[row][column].ray_origin;
+			rays[row][column].ray_direction.normalize();
+		}
+	}
 }

@@ -7,9 +7,69 @@ public:
     Vec2f(float xx) : x(xx), y(xx) {}
     Vec2f(float xx, float yy) : x(xx), y(yy) {}
     Vec2f operator * (const float& r) const { return Vec2f(x * r, y * r); }
+	Vec2f operator * (const Vec2f& v) const { return Vec2f(x * v.x, y * v.y); }
     Vec2f operator / (const float& r) const { return Vec2f(x / r, y / r); }
     Vec2f operator + (const Vec2f& v) const { return Vec2f(x + v.x, y + v.y); }
-    Vec2f operator - (const Vec2f& v) const { return Vec2f(x - v.x, y - v.y); }
+	Vec2f operator - (const Vec2f& v) const { return Vec2f(x - v.x, y - v.y); }
+	Vec2f operator - () const { return Vec2f(-x, -y); }
+
+	float length()
+	{
+		return sqrt(x * x + y * y);
+	}
+
+	Vec2f sign()
+	{
+		if (x > 0)
+		{
+			if (y > 0)
+			{
+				return Vec2f(1, 1);
+			}
+			else
+			{
+				return Vec2f(1, -1);
+			}
+		}
+		else
+		{
+			if (y > 0)
+			{
+				return Vec2f(-1, 1);
+			}
+			else
+			{
+				return Vec2f(-1, -1);
+			}
+		}
+	}
+
+	Vec2f nosign()
+	{
+		if (x > 0)
+		{
+			if (y > 0)
+			{
+				return Vec2f(x, y);
+			}
+			else
+			{
+				return Vec2f(x, -y);
+			}
+		}
+		else
+		{
+			if (y > 0)
+			{
+				return Vec2f(-x, y);
+			}
+			else
+			{
+				return Vec2f(-x, -y);
+			}
+		}
+	}
+
     float x, y;
 };
 
@@ -55,7 +115,7 @@ public:
         return x * x + y * y + z * z;
     }
 
-    Vec3f length(const Vec3f& a)
+    float length()
     {
         return sqrt(x * x + y * y + z * z);
     }
