@@ -1,0 +1,120 @@
+##### ray tracing #####
+
+#####object composed of triangles
+*vertecies
+*faces
+*normals
+
+all saved in arr[3][N]
+
+-----
+????? plane separation ?????
+
+# hyperplaneSeparation:
+test if triangle (p0,p1,p2) projected onto axis n lies in bounding box (halfWidth,halfHeight,halfDepth)
+
+triangle contact:
+*face to face contact -> ... separating axis
+*face to edge contact -> face normal separating axis
+*edge to edge contact -> ... separating axis
+
+axis-aligned bounding box -> 3 axis-aligned separating axis
+axis-aligned bounding box has 12 edges / 3 sets of 4 parallel
+xCROSS-PRODUCTx
+3 triangle edges
+-> 9 separating axis
+
+
+separating axis:
+*normals to the faces
+*cross products of the combinations of an edge from one object with an edge from the other
+
+separating plane:
+
+-----
+##### acceleration structures #####
+
+*uniform gird: equally spaced grid
+*BVH (bounding volume hirarchy): bounding volume around object (often axis-aligned)
+*Oct-tree: subdivide box axis-aligned by two in all three directions simultaneously (each volume is split into 8 in 3D)
+*Kd-tree: subdivide box at optimal positions axis-aligned in optimal direction
+*BSP-tree (binary space partition): subdivide box at optimal positions non-axis-aligned in optimal direction
+
+-----
+##### kd-tree ####
+
+# data
+*AABB
+#nodes
+*trace-back state (bool)
+*splitting plane axis and coordinates
+*left/right child and parent node pointer in memory
+#leafs
+parent node pointer in memory
+*pointers to triangles in memory
+
+#construction - top down
+*start with set of all triangles (store min and max position (2 floats), the pointer to the triangle (2 floats) and if the position is a minimum or a maximum (2 bools) for each axis)
+*for each axis (3) (or simplified by choosing the longest axis for subdivision):
+-sort positions by depth along this axis
+-bring all positions, pointers and bools for all axis in same order
+-subdivide space by plane using SAH
+-work with triangles right from splitting plane, push left and overlapping triangles onto stack
+#upon subdivision:
+-add to current node the adress of the right child (positive direction from splitting plane)
+ node and set trace-back state to zero
+-construct node with subdivison plane axis and coordinates, parent node adress, trace-back state zero
+-> continue building tree
+#upon no subdivision (termination)
+*add to current node the adress of the leaf
+*construct leaf node with pointer to parent node and pointers to triangles
+*ascend tree untill trace-back state zero encountered
+*change trace-back state to one and pull triangles from stack
+-> continue building tree
+
+-----
+##### SAH (surface area heuristic) #####
+
+*subdivision at verticies, 6*(number of triangles) potential split positions
+*on gpu limit number of planes (e.g. to 32) to keep time predictable
+*split if:
+(triangle intersection cost) * (number of triangles)
+<
+(cost of tree traversal) + (triangle intersection cost) * [ (left surface area)/(full surface area)*(number of triangles in left box) + (right surface area)/(full surface area)*(number of triangles in right box) ]
+*also terminate splitting at max_depth
+
+# triangle intersection cost (plane intersection + ) = 1
+# cost of tree traversal (plane intersection + ) = 2
+
+-----
+### primitives in multiple boxes
+
+*put primitive in all boxes
+-> some primitives get tested multiple times for intersection
+-> for each ray remember already intersected primitives (mailboxing) -> more overhead
+
+*clip (subdivide) primitives, such that tey fit exactly in each box
+-> slow subdivision and storage allocation
+
+*overlapping bounding boxes
+-> slower to traverse and even if ray hits something all boxes on path must be tested
+-store primitives at different tree depths
+-> different storage layout (slower ?)
+
+-----
+##### traversal #####
+
+#ray
+*origin & direction
+*zbuffer (determine nearest intersection)
+
+*test all AABB (overlap possible)
+-determine entry and exit point along all three axis, if it lies within AABB for all three axis the AABB is hit by ray
+*traverse tree
+-at every node determine ray-splitting plane intersection
+-descent right node (positive direction) first while setting trace-back bool to zero (one if ray does not hit left node)
+-test triangles in leaf for intersection with ray
+-terminate if hit
+-if not hit ascend tree until trace-back bool zero encountered
+-descend tree towards left node (negative direction) while setting this trace-back bool to one
+...
